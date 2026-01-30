@@ -23,7 +23,7 @@ export default function Navbar() {
             <div className="grid grid-cols-2 lg:grid-cols-3 p-2 px-4 md:pr-2 items-center">
                 <div>
                      {/* <Image src={logoImage} alt="Layers logo" className="h-9 md:h-auto w-auto" /> */}
-                     <DefimartLogo className="h-9 md:h-auto w-auto"/>
+                     <DefimartLogo className="h-9 md:h-auto w-auto" alt="Defiart logo"/>
                 </div>
                 <div className="lg:flex justify-center items-center hidden">
                     <nav className="flex gap-6 font-medium">

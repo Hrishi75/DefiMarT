@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DeFiMarTLogo = ({className, alt}) => {
+const DeFiMarTLogo = ({className = "", alt}) => {
   const containerStyle = {
     display: 'flex',
     alignItems: 'center',
