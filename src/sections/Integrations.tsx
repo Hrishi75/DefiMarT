@@ -6,7 +6,6 @@ import relumeIcon from "@/assets/images/relume-logo.svg";
 import framerIcon from "@/assets/images/framer-logo.svg";
 import githubIcon from "@/assets/images/github-logo.svg";
 import IntegrationColumn from "@/components/IntegrationsColumn";
-import { motion } from "framer-motion";
 
 
 const integrations = [
