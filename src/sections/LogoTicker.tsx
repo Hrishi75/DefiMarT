@@ -1,11 +1,11 @@
 "use client";
-import raydiumlogo from "@/assets/images/raydium.png";
+import raydiumlogo from "@/assets/images/raydium.svg";
 import jupiterlogo from "@/assets/images/jupiter.svg";
-import solanafoundationlogo from "@/assets/images/solanaLogo.svg";
+import solanafoundationlogo from "@/assets/images/svgviewer-output.svg";
 import magicedenlogo from "@/assets/images/ME_Wallet_Hor_Neg.svg";
 import phantomlogo from "@/assets/images/Phantom-Logo-White.svg";
-import metaplexlogo from "@/assets/images/Metaplex_white.svg";
-import superteamlogo from "@/assets/images/superteam.png";
+import metaplexlogo from "@/assets/images/metaplex.svg";
+import solflarelogo from "@/assets/images/solflare.svg";
 import meteoralogo from "@/assets/images/meteora.svg";
 import Image from "next/image";
 import  { Fragment } from "react";
@@ -13,13 +13,13 @@ import { motion } from "framer-motion";
  
 const logos = [
     { name: "Raydium", image: raydiumlogo},
-    { name: "Jupiter", image: jupiterlogo },
+    { name: "Jupiter", image: jupiterlogo }, //done
     { name: "Solana Foundation", image: solanafoundationlogo },
-    { name: "Magic Eden", image: magicedenlogo },
-    { name: "Phantom", image: phantomlogo },
-    { name: "Metaplex", image: metaplexlogo },
-    { name: "Superteam", image: superteamlogo },
-    { name: "Meteora", image: meteoralogo },
+    { name: "Magic Eden", image: magicedenlogo }, //done
+    { name: "Phantom", image: phantomlogo }, //done
+    { name: "Metaplex", image: metaplexlogo }, //done
+    { name: "Solflare", image: solflarelogo },
+    { name: "Meteora", image: meteoralogo }, //done
 ];
 
 export default function LogoTicker() {
