@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import logoPng from "@/assets/images/Defimart logo.png" 
 
 const inter = Inter({
     variable: "--font-inter",
@@ -12,6 +13,9 @@ const inter = Inter({
 export const metadata: Metadata = {
     title: "DefiMart",
     description: "Web3 Ecoomerce Platform",
+    icons: {
+        icon: logoPng.src ,
+    },
 };
 
 export default function RootLayout({
