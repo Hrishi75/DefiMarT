@@ -1,20 +1,20 @@
 import Tag from "@/components/Tag";
-import figmaIcon from "@/assets/images/figma-logo.svg";
-import notionIcon from "@/assets/images/notion-logo.svg";
-import slackIcon from "@/assets/images/slack-logo.svg";
-import relumeIcon from "@/assets/images/relume-logo.svg";
-import framerIcon from "@/assets/images/framer-logo.svg";
-import githubIcon from "@/assets/images/github-logo.svg";
+import phantomIcon from "@/assets/images/phantomicon.svg";
+import backpackIcon from "@/assets/images/backpack.png";
+import anchorIcon from "@/assets/images/anchor.png";
+import solanaIcon from "@/assets/images/svgviewer-output.svg";
+import quciknodeIcon from "@/assets/images/QuickNode_idWYees96N_1.svg";
+import metaplexIcon from "@/assets/images/metaplex.svg";
 import IntegrationColumn from "@/components/IntegrationsColumn";
 
 
 const integrations = [
-    { name: "Figma", icon: figmaIcon, description: "Figma is a collaborative interface design tool." },
-    { name: "Notion", icon: notionIcon, description: "Notion is an all-in-one workspace for notes and docs." },
-    { name: "Slack", icon: slackIcon, description: "Slack is a powerful team communication platform." },
-    { name: "Relume", icon: relumeIcon, description: "Relume is a no-code website builder and design system." },
-    { name: "Framer", icon:framerIcon, description: "Framer is a professional website prototyping tool." },
-    { name: "GitHub", icon: githubIcon, description: "GitHub is the leading platform for code collaboration." },
+    { name: "Phantom", icon: phantomIcon, description: "Wallet for login and payments" },
+    { name: "Backpack", icon: backpackIcon, description: "Secure Solana wallet support" },
+    { name: "Anchor", icon: anchorIcon, description: "Smart contract framework" },
+    { name: "Solana", icon: solanaIcon, description: "Fast, low-cost blockchain" },
+    { name: "QuickNode", icon:quciknodeIcon, description: "Solana RPC & infrastructure" },
+    { name: "Metaplex", icon: metaplexIcon, description: "NFTs and metadata standard" },
 ];
 
 export type IntegrationsType = typeof integrations;
