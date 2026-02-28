@@ -36,7 +36,7 @@ export default function LogoTicker() {
                         src={logo.image}
                         key={logo.name}
                         alt={logo.name}
-                        style={{ width: "auto", height: "auto" }} />
+                        className="h-8 w-auto" />
                     ))}
                         </Fragment>
 
