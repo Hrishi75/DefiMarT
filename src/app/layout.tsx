@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import logoPng from "@/assets/images/Defimart logo.png" 
+import logoPng from "@/assets/images/Defimart logo.png";
+import Navbar from "@/sections/Navbar";
+import Footer from "@/sections/Footer";
+import { WalletProvider } from "@/components/WalletProvider";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const inter = Inter({
     variable: "--font-inter",
@@ -12,9 +16,9 @@ const inter = Inter({
 
 export const metadata: Metadata = {
     title: "DefiMart",
-    description: "Web3 Ecoomerce Platform",
+    description: "Web3 Ecommerce Platform",
     icons: {
-        icon: logoPng.src ,
+        icon: logoPng.src,
     },
 };
 
@@ -28,9 +32,14 @@ export default function RootLayout({
             <body
                 className={`${inter.variable} font-sans antialiased bg-neutral-950 text-white`}
             >
-                {children}
+                <WalletProvider>
+                    <AuthProvider>
+                        <Navbar />
+                        {children}
+                        <Footer />
+                    </AuthProvider>
+                </WalletProvider>
             </body>
         </html>
     );
 }
-// sm:text-blue-500 md:text-green-500 lg:text-red-500

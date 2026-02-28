@@ -3,9 +3,19 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  /* config options here */
   images: {
-    domains: ["images.unsplash.com", "img.clerk.com"],
+    unoptimized: true,
+    domains: [
+      "images.unsplash.com",
+      "img.clerk.com",
+    ],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
   },
 };
 
