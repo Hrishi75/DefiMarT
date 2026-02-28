@@ -10,7 +10,7 @@ export function transformEvent(row: DbEvent): Event {
     slug: row.slug,
     name: row.name,
     description: row.description ?? '',
-    coverImage: row.cover_image_url ?? '/api/placeholder/1200/400',
+    coverImage: row.cover_image_url ?? '/placeholder.svg',
     logo: row.logo_url ?? undefined,
     location: row.location,
     date: new Date(row.date),

@@ -6,7 +6,7 @@ import designExample1image from "@/assets/images/design-example-1.png";
 import designExample2image from "@/assets/images/design-example-2.png";
 import Image from "next/image";
 import { motion, useAnimate } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import cursorYouImage from "@/assets/images/cursor-you.svg"
 
 export default function Hero() {
@@ -14,6 +14,35 @@ export default function Hero() {
     const [leftPointerScope, leftPointerAnimate] = useAnimate();
     const [rightDesignScope, rightDesignAnimate] = useAnimate();
     const [rightPointerScope, rightPointerAnimate] = useAnimate();
+
+    const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [formError, setFormError] = useState('');
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        setFormError('');
+        setLoading(true);
+        try {
+            const res = await fetch('/api/waitlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setFormError(data.error ?? 'Something went wrong.');
+            } else {
+                setSubmitted(true);
+                setEmail('');
+            }
+        } catch {
+            setFormError('Something went wrong. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    }
 
     useEffect(() => {
            leftDesignAnimate([
@@ -52,14 +81,30 @@ export default function Hero() {
               <Pointer name="Riya" color="red"/>
             </motion.div>
             <div className="flex justify-center">
-            <div className="inline-flex py-1 px-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full text-neutral-950 font-semibold">Designed for people who love events</div>
+            <div className="inline-flex py-1 px-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full text-neutral-950 font-semibold">✨ Designed for people who love events ✨</div>
             </div>
             <h1 className="text-6xl md:text-7xl lg:text-8xl font-medium text-center mt-6">Event culture, <br/>redefined.</h1>
             <p className="text-center text-xl text-white/50 mt-8 max-w-2xl mx-auto">A social marketplace with a feed for sharing and trading merchandise from blockchain conferences and community events.</p>
-            <form className="flex border border-white/15 rounded-full p-2 mt-8 max-w-lg mx-auto">
-                <input type="email" placeholder="Enter Your email" className="bg-transparent px-4 md:flex-1 w-full" />
-                <Button type="submit" variant="primary" className="whitespace-nowrap" size="sm">Sign Up</Button>
-            </form>
+            {submitted ? (
+                <p className="text-center text-green-400 mt-8 font-medium">You&apos;re on the list! We&apos;ll be in touch.</p>
+            ) : (
+                <form onSubmit={handleSubmit} className="flex border border-white/15 rounded-full p-2 mt-8 max-w-lg mx-auto">
+                    <input
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="bg-transparent px-4 md:flex-1 w-full outline-none"
+                    />
+                    <Button type="submit" variant="primary" className="whitespace-nowrap" size="sm" disabled={loading}>
+                        {loading ? 'Joining...' : 'Join the Waitlist'}
+                    </Button>
+                </form>
+            )}
+            {formError && (
+                <p className="text-center text-red-400 mt-3 text-sm">{formError}</p>
+            )}
 
         </div>
     </section>

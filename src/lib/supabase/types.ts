@@ -376,6 +376,87 @@ export interface Database {
           used?: boolean;
         };
       };
+      favorites: {
+        Row: {
+          id: string;
+          user_id: string;
+          listing_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          listing_id: string;
+          created_at?: string;
+        };
+        Update: never;
+      };
+      conversations: {
+        Row: {
+          id: string;
+          participant_1: string;
+          participant_2: string;
+          last_message_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          participant_1: string;
+          participant_2: string;
+          last_message_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          last_message_at?: string;
+        };
+      };
+      messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          sender_id: string;
+          content: string;
+          read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          sender_id: string;
+          content: string;
+          read?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          read?: boolean;
+        };
+      };
+      reviews: {
+        Row: {
+          id: string;
+          reviewer_id: string;
+          reviewed_id: string;
+          listing_id: string;
+          transaction_id: string;
+          rating: number;
+          content: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          reviewer_id: string;
+          reviewed_id: string;
+          listing_id: string;
+          transaction_id: string;
+          rating: number;
+          content?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          rating?: number;
+          content?: string | null;
+        };
+      };
     };
   };
 }

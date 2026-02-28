@@ -1,30 +1,63 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { use } from "react";
 import { useSupabase } from "@/hooks/useSupabase";
 import { getListingById as getListingByIdDb } from "@/lib/supabase/queries/listings";
 import { getListingById as getListingByIdMock } from "@/lib/mockData";
 import { useAuth } from "@/contexts/AuthContext";
-import { Listing } from "@/types/marketplace";
+import { Listing, NFTAsset } from "@/types/marketplace";
+import { getAccountExplorerUrl, getApproxUsdValue, formatPrice } from "@/lib/solana/constants";
 import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/Button";
 import Tag from "@/components/Tag";
+import PurchaseModal from "@/components/marketplace/PurchaseModal";
+import FavoriteButton from "@/components/FavoriteButton";
+import { useTransaction } from "@/hooks/useTransaction";
+import ReviewCard from "@/components/ReviewCard";
+import StarRating from "@/components/StarRating";
+import { Review } from "@/types/marketplace";
 import { twMerge } from "tailwind-merge";
 
-export default function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
+export default function ListingDetailPage({ params }: { params: { id: string } }) {
+  const resolvedParams = params;
   const supabase = useSupabase();
   const { user, isAuthenticated } = useAuth();
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [onChainNft, setOnChainNft] = useState<NFTAsset | null>(null);
+  const { depositToEscrow, loading: escrowLoading } = useTransaction();
+  const [escrowDepositing, setEscrowDepositing] = useState(false);
+  const [nftVerifying, setNftVerifying] = useState(false);
+  const [nftVerified, setNftVerified] = useState<boolean | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
 
   useEffect(() => {
     fetchListing();
+    fetchReviews();
   }, [resolvedParams.id]);
+
+  async function fetchReviews() {
+    try {
+      const res = await fetch(`/api/reviews?listingId=${resolvedParams.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setReviews(
+          (data.reviews || []).map((r: any) => ({
+            ...r,
+            createdAt: new Date(r.createdAt),
+          }))
+        );
+        setAverageRating(data.averageRating || 0);
+      }
+    } catch {
+      // Reviews are non-critical
+    }
+  }
 
   async function fetchListing() {
     setLoading(true);
@@ -36,6 +69,32 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
       setListing(mockListing ?? null);
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Verify NFT on-chain when listing loads
+  useEffect(() => {
+    if (listing?.isNFT && listing.nftMetadata?.mintAddress) {
+      verifyNftOnChain(listing.nftMetadata.mintAddress);
+    }
+  }, [listing?.id]);
+
+  async function verifyNftOnChain(mintAddress: string) {
+    setNftVerifying(true);
+    setNftVerified(null);
+    try {
+      const res = await fetch(`/api/nft/metadata?mint=${mintAddress}`);
+      if (res.ok) {
+        const data = await res.json();
+        setOnChainNft(data.nft);
+        setNftVerified(true);
+      } else {
+        setNftVerified(false);
+      }
+    } catch {
+      setNftVerified(false);
+    } finally {
+      setNftVerifying(false);
     }
   }
 
@@ -149,12 +208,12 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
             <div className="bg-neutral-900 border border-white/10 rounded-2xl p-6 mb-6">
               <div className="flex items-baseline gap-2 mb-2">
                 <span className="text-4xl font-bold">{listing.price}</span>
-                <span className="text-2xl text-lime-400 font-bold">SOL</span>
-                <span className="text-white/50 text-sm ml-auto">&asymp; ${(listing.price * 150).toFixed(2)} USD</span>
+                <span className="text-2xl text-lime-400 font-bold">{listing.currency}</span>
+                <span className="text-white/50 text-sm ml-auto">&asymp; ${getApproxUsdValue(listing.price, listing.currency).toFixed(2)} USD</span>
               </div>
               {listing.shippingInfo && (
                 <div className="text-sm text-white/50">
-                  + {listing.shippingInfo.cost} SOL shipping
+                  + {listing.shippingInfo.cost} {listing.currency} shipping
                 </div>
               )}
             </div>
@@ -187,41 +246,96 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
               <div className="bg-neutral-900/50 border border-white/10 rounded-2xl p-4 mb-6">
                 <div className="flex justify-between text-sm mb-2">
                   <span className="text-white/50">Item Price</span>
-                  <span>{totalPrice.toFixed(2)} SOL</span>
+                  <span>{formatPrice(totalPrice, listing.currency)}</span>
                 </div>
                 {shippingCost > 0 && (
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-white/50">Shipping</span>
-                    <span>{shippingCost.toFixed(2)} SOL</span>
+                    <span>{formatPrice(shippingCost, listing.currency)}</span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold pt-2 border-t border-white/10">
                   <span>Total</span>
-                  <span className="text-lime-400">{grandTotal.toFixed(2)} SOL</span>
+                  <span className="text-lime-400">{formatPrice(grandTotal, listing.currency)}</span>
                 </div>
+              </div>
+            )}
+
+            {/* NFT Escrow Status */}
+            {listing.isNFT && (
+              <div className="mb-6">
+                {listing.status === 'escrowed' && (
+                  <div className="flex items-center gap-2 bg-lime-400/10 border border-lime-400/30 rounded-xl px-4 py-3">
+                    <svg className="w-5 h-5 text-lime-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span className="text-sm text-lime-400 font-medium">NFT secured in escrow</span>
+                  </div>
+                )}
+                {listing.status === 'active' && (
+                  <div className="flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/30 rounded-xl px-4 py-3">
+                    <svg className="w-5 h-5 text-yellow-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <span className="text-sm text-yellow-400 font-medium">NFT not yet deposited to escrow</span>
+                  </div>
+                )}
+                {isOwnListing && listing.status === 'active' && listing.nftMetadata?.mintAddress && (
+                  <Button
+                    variant="primary"
+                    className="w-full !h-12 mt-3"
+                    onClick={async () => {
+                      setEscrowDepositing(true);
+                      const result = await depositToEscrow(resolvedParams.id, listing.nftMetadata!.mintAddress);
+                      setEscrowDepositing(false);
+                      if (result) {
+                        // Reload listing to reflect escrowed status
+                        window.location.reload();
+                      }
+                    }}
+                    disabled={escrowDepositing || escrowLoading}
+                  >
+                    {escrowDepositing ? 'Depositing NFT...' : 'Deposit NFT to Escrow'}
+                  </Button>
+                )}
               </div>
             )}
 
             {/* Action Buttons */}
             <div className="flex gap-3 mb-8">
               {isOwnListing ? (
-                <Button variant="secondary" className="flex-1 !h-14 text-lg">
-                  Edit Listing
-                </Button>
+                <Link href={`/marketplace/${resolvedParams.id}/edit`} className="flex-1">
+                  <Button variant="secondary" className="w-full !h-14 text-lg">
+                    Edit Listing
+                  </Button>
+                </Link>
               ) : isAuthenticated ? (
-                <Button variant="primary" className="flex-1 !h-14 text-lg">
-                  Buy Now
+                <Button
+                  variant="primary"
+                  className="flex-1 !h-14 text-lg"
+                  onClick={() => setShowPurchaseModal(true)}
+                  disabled={
+                    listing.status === 'sold' ||
+                    listing.status === 'cancelled' ||
+                    (listing.isNFT && listing.status === 'active')
+                  }
+                >
+                  {listing.status === 'sold' || listing.status === 'cancelled'
+                    ? 'Sold Out'
+                    : listing.isNFT && listing.status === 'active'
+                    ? 'Awaiting NFT Deposit'
+                    : 'Buy Now'}
                 </Button>
               ) : (
                 <Button variant="primary" className="flex-1 !h-14 text-lg opacity-50 cursor-not-allowed">
                   Connect Wallet to Buy
                 </Button>
               )}
-              <button className="w-14 h-14 rounded-full bg-neutral-900 border border-white/10 hover:border-lime-400 transition flex items-center justify-center">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </button>
+              <FavoriteButton
+                listingId={resolvedParams.id}
+                initialCount={listing.favorites}
+                className="w-14 h-14"
+              />
             </div>
 
             {/* Description */}
@@ -266,19 +380,87 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
-            {/* NFT Metadata */}
+            {/* NFT On-Chain Verification */}
             {listing.isNFT && listing.nftMetadata && (
               <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-2xl p-6 mb-8">
-                <h3 className="text-lg font-medium mb-4">NFT Information</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium">NFT Information</h3>
+                  {nftVerifying ? (
+                    <div className="flex items-center gap-2 text-xs text-white/50">
+                      <div className="animate-spin w-3.5 h-3.5 border-2 border-purple-400 border-t-transparent rounded-full" />
+                      Verifying on-chain...
+                    </div>
+                  ) : nftVerified === true ? (
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-lime-400 bg-lime-400/10 px-3 py-1.5 rounded-full">
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      Verified On-Chain
+                    </div>
+                  ) : nftVerified === false ? (
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-red-400 bg-red-400/10 px-3 py-1.5 rounded-full">
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      Not Verified
+                    </div>
+                  ) : null}
+                </div>
+
                 <div className="space-y-3">
+                  {/* Mint Address with Explorer link */}
                   <div>
                     <div className="text-sm text-white/50 mb-1">Mint Address</div>
-                    <div className="font-mono text-sm text-white break-all">{listing.nftMetadata.mintAddress}</div>
+                    <a
+                      href={getAccountExplorerUrl(listing.nftMetadata.mintAddress)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-sm text-purple-300 hover:text-lime-400 transition break-all flex items-center gap-2"
+                    >
+                      {listing.nftMetadata.mintAddress}
+                      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
                   </div>
-                  {listing.nftMetadata.collection && (
+
+                  {/* Collection */}
+                  {(listing.nftMetadata.collection || onChainNft?.collection) && (
                     <div>
                       <div className="text-sm text-white/50 mb-1">Collection</div>
-                      <div className="text-white">{listing.nftMetadata.collection}</div>
+                      <div className="flex items-center gap-2">
+                        {onChainNft?.collection?.verified && (
+                          <svg className="w-4 h-4 text-lime-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                        <span className="text-white">
+                          {onChainNft?.collection?.name || listing.nftMetadata.collection}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* On-chain attributes */}
+                  {onChainNft?.attributes && onChainNft.attributes.length > 0 && (
+                    <div>
+                      <div className="text-sm text-white/50 mb-2">Attributes</div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {onChainNft.attributes.map((attr, i) => (
+                          <div key={i} className="bg-neutral-800/50 border border-white/5 rounded-lg p-2.5">
+                            <div className="text-xs text-purple-300 mb-0.5">{attr.traitType}</div>
+                            <div className="text-sm font-medium truncate">{attr.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Symbol */}
+                  {onChainNft?.symbol && (
+                    <div>
+                      <div className="text-sm text-white/50 mb-1">Symbol</div>
+                      <div className="text-white">{onChainNft.symbol}</div>
                     </div>
                   )}
                 </div>
@@ -313,6 +495,26 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
                 </Link>
               </div>
             )}
+
+            {/* Reviews Section */}
+            {reviews.length > 0 && (
+              <div className="mt-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <h3 className="text-xl font-medium">Reviews</h3>
+                  <div className="flex items-center gap-2">
+                    <StarRating rating={averageRating} size="sm" />
+                    <span className="text-sm text-white/50">
+                      ({reviews.length} review{reviews.length !== 1 ? "s" : ""})
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <ReviewCard key={review.id} review={review} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -339,6 +541,18 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </div>
+
+      {/* Purchase Modal */}
+      {showPurchaseModal && listing && (
+        <PurchaseModal
+          listing={listing}
+          quantity={quantity}
+          onClose={() => {
+            setShowPurchaseModal(false);
+            fetchListing(); // Refresh listing data after purchase
+          }}
+        />
+      )}
     </div>
   );
 }

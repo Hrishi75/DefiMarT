@@ -32,10 +32,11 @@ export default function LogoTicker() {
                     {Array.from({ length: 2 }).map((_, i) => (
                         <Fragment key={i}>
                          {logos.map(logo => (
-                        <Image 
-                        src={logo.image} 
-                        key={logo.name} 
-                        alt={logo.name} />
+                        <Image
+                        src={logo.image}
+                        key={logo.name}
+                        alt={logo.name}
+                        style={{ width: "auto", height: "auto" }} />
                     ))}
                         </Fragment>
 

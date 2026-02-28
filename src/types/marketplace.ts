@@ -4,6 +4,7 @@ export type ListingStatus = 'active' | 'sold' | 'pending' | 'cancelled' | 'escro
 export type ItemCondition = 'new' | 'like-new' | 'good' | 'fair';
 export type ItemCategory = 'apparel' | 'collectible' | 'nft' | 'accessory' | 'badge' | 'other';
 export type TransactionStatus = 'pending' | 'escrowed' | 'confirmed' | 'shipped' | 'completed' | 'failed' | 'refunded' | 'disputed';
+export type TokenCurrency = 'SOL' | 'USDC' | 'PYUSD' | 'EURC';
 
 export interface User {
   id: string;
@@ -62,8 +63,8 @@ export interface Listing {
   images: string[];
   category: ItemCategory;
   condition: ItemCondition;
-  price: number; // in SOL
-  currency: 'SOL' | 'USDC';
+  price: number;
+  currency: TokenCurrency;
   status: ListingStatus;
   quantity: number;
   quantityAvailable: number;
@@ -135,7 +136,7 @@ export interface Transaction {
   sellerId: string;
   seller: User;
   amount: number;
-  currency: 'SOL' | 'USDC';
+  currency: TokenCurrency;
   status: TransactionStatus;
   transactionHash?: string;
   escrowAddress?: string;
@@ -147,7 +148,7 @@ export interface Transaction {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'sale' | 'purchase' | 'message' | 'follow' | 'like' | 'comment';
+  type: 'sale' | 'purchase' | 'message' | 'follow' | 'like' | 'comment' | 'review';
   title: string;
   message: string;
   link?: string;
@@ -160,6 +161,68 @@ export interface Follow {
   followerId: string;
   followingId: string;
   createdAt: Date;
+}
+
+export interface Favorite {
+  id: string;
+  userId: string;
+  listingId: string;
+  createdAt: Date;
+}
+
+export interface Conversation {
+  id: string;
+  participant1: string;
+  participant2: string;
+  otherUser: User;
+  lastMessage?: Message;
+  lastMessageAt: Date;
+  unreadCount: number;
+  createdAt: Date;
+}
+
+export interface Message {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  sender?: User;
+  content: string;
+  read: boolean;
+  createdAt: Date;
+}
+
+export interface Review {
+  id: string;
+  reviewerId: string;
+  reviewer: User;
+  reviewedId: string;
+  listingId: string;
+  transactionId: string;
+  rating: number;
+  content?: string;
+  createdAt: Date;
+}
+
+// NFT types
+export interface NFTAttribute {
+  traitType: string;
+  value: string;
+}
+
+export interface NFTAsset {
+  mintAddress: string;
+  name: string;
+  symbol: string;
+  image: string;
+  description: string;
+  collection?: {
+    name: string;
+    verified: boolean;
+    address: string;
+  };
+  attributes?: NFTAttribute[];
+  owner: string;
+  uri: string;
 }
 
 // Filter and sort types

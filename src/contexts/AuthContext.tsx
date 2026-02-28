@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   ReactNode,
 } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -19,6 +20,7 @@ interface AuthContextValue {
   isLoading: boolean;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -27,6 +29,7 @@ const AuthContext = createContext<AuthContextValue>({
   isLoading: true,
   signIn: async () => {},
   signOut: async () => {},
+  refreshUser: async () => {},
 });
 
 export function useAuth() {
@@ -37,18 +40,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { publicKey, signMessage, connected, disconnect } = useWallet();
   const [user, setUser] = useState<DbUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Prevents re-triggering signIn in a loop if it fails
+  const signInAttempted = useRef(false);
 
   // Check existing session on mount
   useEffect(() => {
     checkSession();
   }, []);
 
-  // Auto sign-in when wallet connects and no session exists
+  // Reset attempt flag when wallet disconnects so reconnect works
   useEffect(() => {
-    if (connected && publicKey && !user && !isLoading) {
+    if (!connected) {
+      signInAttempted.current = false;
+    }
+  }, [connected]);
+
+  // Auto sign-in when wallet connects (and session check is done).
+  // isLoading + signMessage are deps so this re-fires if they become
+  // available after autoConnect has already set connected=true.
+  useEffect(() => {
+    if (connected && publicKey && !user && !isLoading && !signInAttempted.current) {
+      if (!signMessage) return; // not ready yet — will re-run when signMessage becomes defined
+      signInAttempted.current = true;
       signIn();
     }
-  }, [connected, publicKey]);
+  }, [connected, publicKey, isLoading, signMessage]);
 
   async function checkSession() {
     try {
@@ -122,6 +138,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [disconnect]);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await fetch('/api/auth/session');
+      const data = await res.json();
+      if (data.user) {
+        setUser(data.user);
+      }
+    } catch (err) {
+      console.error('Refresh user failed:', err);
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -130,6 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         signIn,
         signOut,
+        refreshUser,
       }}
     >
       {children}

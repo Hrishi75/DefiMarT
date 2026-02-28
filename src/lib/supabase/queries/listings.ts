@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../types';
-import type { Listing, MarketplaceFilters, SortOption } from '@/types/marketplace';
+import type { Listing, MarketplaceFilters, SortOption, TokenCurrency } from '@/types/marketplace';
 import { transformUser } from './users';
 import { transformEvent } from './events';
 
@@ -19,11 +19,11 @@ export function transformListing(
     event: row.event ? transformEvent(row.event) : ({} as any),
     title: row.title,
     description: row.description ?? '',
-    images: row.images.length > 0 ? row.images : ['/api/placeholder/600/600'],
+    images: row.images.length > 0 ? row.images : ['/placeholder.svg'],
     category: row.category as Listing['category'],
     condition: row.condition as Listing['condition'],
     price: Number(row.price),
-    currency: row.currency as 'SOL' | 'USDC',
+    currency: (row.currency || 'SOL') as TokenCurrency,
     status: row.status as Listing['status'],
     quantity: row.quantity,
     quantityAvailable: row.quantity_available,

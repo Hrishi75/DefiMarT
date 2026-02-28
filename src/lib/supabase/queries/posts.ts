@@ -4,6 +4,7 @@ import type { Post } from '@/types/marketplace';
 import { transformUser } from './users';
 import { transformEvent } from './events';
 import { transformListing } from './listings';
+import { getFollowingIds } from './follows';
 
 export function transformPost(row: any): Post {
   return {
@@ -28,7 +29,8 @@ export async function getPosts(
   supabase: SupabaseClient<Database>,
   filter: 'all' | 'following' | 'trending' = 'all',
   page: number = 0,
-  pageSize: number = 20
+  pageSize: number = 20,
+  currentUserId?: string
 ) {
   let query = supabase
     .from('posts')
@@ -36,6 +38,15 @@ export async function getPosts(
       '*, user:users!user_id(*), event:events!event_id(*), linked_listing:listings!linked_listing_id(*, seller:users!seller_id(*), event:events!event_id(*))',
       { count: 'exact' }
     );
+
+  // Following filter: only show posts from users the current user follows
+  if (filter === 'following' && currentUserId) {
+    const followingIds = await getFollowingIds(supabase, currentUserId);
+    if (followingIds.length === 0) {
+      return { posts: [], count: 0 };
+    }
+    query = query.in('user_id', followingIds);
+  }
 
   if (filter === 'trending') {
     query = query.order('likes_count', { ascending: false });

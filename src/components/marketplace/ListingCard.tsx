@@ -1,4 +1,5 @@
 import { Listing } from "@/types/marketplace";
+import { formatPrice } from "@/lib/solana/constants";
 import Image from "next/image";
 import Link from "next/link";
 import { twMerge } from "tailwind-merge";
@@ -88,11 +89,11 @@ export default function ListingCard({ listing, viewMode = 'grid' }: ListingCardP
             )}>
               <div>
                 <div className="text-2xl font-bold text-white">
-                  {listing.price} <span className="text-lime-400">SOL</span>
+                  {listing.price} <span className="text-lime-400">{listing.currency}</span>
                 </div>
                 {listing.shippingInfo && (
                   <div className="text-xs text-white/50 mt-1">
-                    + {listing.shippingInfo.cost} SOL shipping
+                    + {formatPrice(listing.shippingInfo.cost, listing.currency)} shipping
                   </div>
                 )}
               </div>
