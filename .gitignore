@@ -38,4 +38,12 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# anchor / rust / solana
+/target
+.anchor
+test-ledger
+**/*.rs.bk
+/programs/**/target
+
 next-env.d.ts

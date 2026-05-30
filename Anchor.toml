@@ -1,0 +1,28 @@
+[toolchain]
+anchor_version = "0.30.1"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+escrow = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+marketplace = "Cy8aF5sBkY7eV7Zrz1KdT8Rd4kHQ7T9aDz8Yp4xKpUb"
+event_registry = "EvRegMArT9bGq5pYwH3xTn2cVfK8sJ4dLzQ6mNpR7aBc"
+merch_mint = "MrChMnTdefiMArT5kQwR8nVbY2tGp7sLx3JhD6fZ9aWc"
+
+[programs.devnet]
+escrow = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+marketplace = "Cy8aF5sBkY7eV7Zrz1KdT8Rd4kHQ7T9aDz8Yp4xKpUb"
+event_registry = "EvRegMArT9bGq5pYwH3xTn2cVfK8sJ4dLzQ6mNpR7aBc"
+merch_mint = "MrChMnTdefiMArT5kQwR8nVbY2tGp7sLx3JhD6fZ9aWc"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "Devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tests/tsconfig.json -t 1000000 tests/**/*.ts"
