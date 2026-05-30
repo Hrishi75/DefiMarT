@@ -6,6 +6,7 @@ import Navbar from "@/sections/Navbar";
 import Footer from "@/sections/Footer";
 import { WalletProvider } from "@/components/WalletProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import cursorYouImage from "@/assets/images/cursor-you.svg";
 
 const inter = Inter({
     variable: "--font-inter",
@@ -31,6 +32,7 @@ export default function RootLayout({
         <html lang="en">
             <body
                 className={`${inter.variable} font-sans antialiased bg-neutral-950 text-white`}
+                style={{ cursor: `url(${cursorYouImage.src}), auto` }}
             >
                 <WalletProvider>
                     <AuthProvider>

@@ -7,7 +7,6 @@ import designExample2image from "@/assets/images/design-example-2.png";
 import Image from "next/image";
 import { motion, useAnimate } from "framer-motion";
 import { useEffect, useState } from "react";
-import cursorYouImage from "@/assets/images/cursor-you.svg"
 
 export default function Hero() {
     const [leftDesignScope, leftDesignAnimate] = useAnimate();
@@ -65,7 +64,7 @@ export default function Hero() {
             [rightPointerScope.current, { x: 0, y: [0, 20, 0]}, { duration: 0.5 }],
            ]);
     }, []);
-    return (<section className="py-24 overflow-x-clip" style={{ cursor: `url(${cursorYouImage.src }), auto`,}}>
+    return (<section className="py-24 overflow-x-clip">
         <div className="container relative">
             <motion.div ref={leftDesignScope} initial={{ opacity: 0, y: 100, x: -100 }} drag className="absolute -left-32 top-16 hidden lg:block">
                 <Image src={designExample1image} alt="Design example 1 image" draggable="false" />
