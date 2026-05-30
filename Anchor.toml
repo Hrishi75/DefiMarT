@@ -8,10 +8,12 @@ skip-lint = false
 [programs.localnet]
 escrow = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 marketplace = "Cy8aF5sBkY7eV7Zrz1KdT8Rd4kHQ7T9aDz8Yp4xKpUb"
+event_registry = "EvRegMArT9bGq5pYwH3xTn2cVfK8sJ4dLzQ6mNpR7aBc"
 
 [programs.devnet]
 escrow = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
 marketplace = "Cy8aF5sBkY7eV7Zrz1KdT8Rd4kHQ7T9aDz8Yp4xKpUb"
+event_registry = "EvRegMArT9bGq5pYwH3xTn2cVfK8sJ4dLzQ6mNpR7aBc"
 
 [registry]
 url = "https://api.apr.dev"
