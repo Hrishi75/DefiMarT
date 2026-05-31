@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import EclipseMark from "@/components/dm/EclipseMark";
 import Verified from "@/components/dm/Verified";
 import Chip from "@/components/dm/Chip";
 import DmButton from "@/components/dm/DmButton";
@@ -22,11 +21,13 @@ function HeroEclipse() {
           background: "rgba(155,92,255,0.28)", animation: "dm-pulse-glow 6s ease-in-out infinite",
         }}
       />
-      <EclipseMark
-        size={520}
+      {/* real eclipse PNG composited via screen blend so the black bg drops out */}
+      <img
+        src="/dm-assets/eclipse-logo.png"
+        alt="Eclipse"
         style={{
-          width: "100%", height: "auto", position: "relative",
-          animation: "dm-floaty 9s ease-in-out infinite",
+          position: "relative", width: "100%", height: "100%", objectFit: "contain",
+          mixBlendMode: "screen", animation: "dm-floaty 9s ease-in-out infinite",
         }}
       />
       {/* floating verified chip */}
