@@ -22,7 +22,6 @@ export default function Chip({ active = false, pill = false, children, style, ..
         whiteSpace: "nowrap",
         cursor: props.onClick ? "pointer" : "default",
         transition: "all .2s ease",
-        border: "none",
         fontFamily: "inherit",
         ...(pill
           ? {
@@ -34,6 +33,7 @@ export default function Chip({ active = false, pill = false, children, style, ..
           ? {
               color: "var(--text)",
               background: "var(--grad-soft)",
+              border: "none",
               boxShadow: "inset 0 0 0 1px rgba(155,92,255,0.4)",
             }
           : {
