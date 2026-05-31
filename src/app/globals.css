@@ -163,3 +163,22 @@ img { display: block; max-width: 100%; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; border: 3px solid var(--bg); }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+
+/* ---- responsive ---- */
+@media (max-width: 1024px) {
+  .dm-hero-grid    { grid-template-columns: 1fr !important; }
+  .dm-how-grid     { grid-template-columns: 1fr !important; }
+  .dm-card-grid    { grid-template-columns: repeat(2,1fr) !important; }
+  .dm-card-grid-4  { grid-template-columns: repeat(2,1fr) !important; }
+  .dm-market-grid  { grid-template-columns: 1fr !important; }
+  .dm-product-grid { grid-template-columns: 1fr !important; }
+  .dm-foot-grid    { grid-template-columns: 1fr 1fr !important; }
+  .dm-results-grid { grid-template-columns: repeat(2,1fr) !important; }
+}
+
+@media (max-width: 600px) {
+  .dm-card-grid    { grid-template-columns: 1fr !important; }
+  .dm-card-grid-4  { grid-template-columns: 1fr !important; }
+  .dm-results-grid { grid-template-columns: 1fr !important; }
+  .dm-foot-grid    { grid-template-columns: 1fr !important; }
+}

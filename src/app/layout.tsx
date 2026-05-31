@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import logoPng from "@/assets/images/Defimart logo.png";
-import Navbar from "@/sections/Navbar";
-import Footer from "@/sections/Footer";
+import DmNavbar from "@/components/dm/DmNavbar";
+import DmFooter from "@/components/dm/DmFooter";
 import { WalletProvider } from "@/components/WalletProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import cursorYouImage from "@/assets/images/cursor-you.svg";
@@ -54,9 +54,9 @@ export default function RootLayout({
             >
                 <WalletProvider>
                     <AuthProvider>
-                        <Navbar />
+                        <DmNavbar />
                         {children}
-                        <Footer />
+                        <DmFooter />
                     </AuthProvider>
                 </WalletProvider>
             </body>
