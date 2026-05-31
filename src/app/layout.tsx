@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import logoPng from "@/assets/images/Defimart logo.png";
 import Navbar from "@/sections/Navbar";
@@ -8,11 +8,25 @@ import { WalletProvider } from "@/components/WalletProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import cursorYouImage from "@/assets/images/cursor-you.svg";
 
-const inter = Inter({
-    variable: "--font-inter",
+const spaceGrotesk = Space_Grotesk({
+    variable: "--font-space-grotesk",
     subsets: ["latin"],
+    weight: ["400", "500", "600", "700"],
     display: "swap",
-    axes: ["opsz"],
+});
+
+const manrope = Manrope({
+    variable: "--font-manrope",
+    subsets: ["latin"],
+    weight: ["400", "500", "600", "700", "800"],
+    display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+    variable: "--font-jetbrains-mono",
+    subsets: ["latin"],
+    weight: ["400", "500", "600"],
+    display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -31,8 +45,12 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body
-                className={`${inter.variable} font-sans antialiased bg-neutral-950 text-white`}
-                style={{ cursor: `url(${cursorYouImage.src}), auto` }}
+                className={`${spaceGrotesk.variable} ${manrope.variable} ${jetbrainsMono.variable} font-sans antialiased`}
+                style={{
+                    background: "var(--bg)",
+                    color: "var(--text)",
+                    cursor: `url(${cursorYouImage.src}), auto`,
+                }}
             >
                 <WalletProvider>
                     <AuthProvider>
