@@ -1,9 +1,11 @@
 interface EclipseMarkProps {
   size?: number;
   animate?: boolean;
+  style?: React.CSSProperties;
+  className?: string;
 }
 
-export default function EclipseMark({ size = 34, animate = false }: EclipseMarkProps) {
+export default function EclipseMark({ size = 34, animate = false, style, className }: EclipseMarkProps) {
   const gid = `eg${size}`;
   const mid = `em${size}`;
   return (
@@ -12,7 +14,8 @@ export default function EclipseMark({ size = 34, animate = false }: EclipseMarkP
       height={size}
       viewBox="0 0 100 100"
       fill="none"
-      style={{ flexShrink: 0, animation: animate ? "dm-spin-slow 28s linear infinite" : "none" }}
+      className={className}
+      style={{ flexShrink: 0, animation: animate ? "dm-spin-slow 28s linear infinite" : "none", ...style }}
     >
       <defs>
         <linearGradient id={gid} x1="20" y1="92" x2="82" y2="14" gradientUnits="userSpaceOnUse">
