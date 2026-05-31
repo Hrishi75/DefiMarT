@@ -4,6 +4,8 @@ interface IconProps {
   size?: number;
   sw?: number;
   fill?: string;
+  style?: React.CSSProperties;
+  className?: string;
 }
 
 function Ic({
@@ -12,6 +14,8 @@ function Ic({
   sw = 1.7,
   fill = "none",
   vb = "0 0 24 24",
+  style,
+  className,
   children,
 }: {
   d?: string;
@@ -19,6 +23,8 @@ function Ic({
   sw?: number;
   fill?: string;
   vb?: string;
+  style?: React.CSSProperties;
+  className?: string;
   children?: React.ReactNode;
 }) {
   return (
@@ -31,6 +37,8 @@ function Ic({
       strokeWidth={sw}
       strokeLinecap="round"
       strokeLinejoin="round"
+      style={style}
+      className={className}
     >
       {d ? <path d={d} /> : children}
     </svg>
