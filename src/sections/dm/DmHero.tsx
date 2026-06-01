@@ -115,7 +115,7 @@ export default function DmHero({ onConnect }: DmHeroProps) {
                 ))}
               </div>
               <div style={{ fontSize: 13.5, color: "var(--muted)" }}>
-                <span style={{ color: "var(--text)", fontWeight: 700 }}>9,400+</span> collectors trading this week
+                <span style={{ color: "var(--text)", fontWeight: 700 }}>4</span> collectors trading on-chain
               </div>
             </div>
           </div>
