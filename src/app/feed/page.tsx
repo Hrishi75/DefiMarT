@@ -1,52 +1,66 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSupabase } from "@/hooks/useSupabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { getPosts, transformPost } from "@/lib/supabase/queries/posts";
 import { getRecentPosts } from "@/lib/mockData";
 import { Post } from "@/types/marketplace";
-import Tag from "@/components/Tag";
-import Button from "@/components/Button";
-import PostCard from "@/components/feed/PostCard";
+import { Icons } from "@/components/dm/Icons";
+import EclipseMark from "@/components/dm/EclipseMark";
+import FeedPostCard from "@/components/dm/FeedPostCard";
+import { derivePostType, typeMatchesTab } from "@/components/dm/feedMeta";
+
+const TABS = [
+  { k: "foryou", label: "For you" },
+  { k: "following", label: "Following" },
+  { k: "drops", label: "Drops" },
+  { k: "trades", label: "Trades" },
+  { k: "showcases", label: "Showcases" },
+] as const;
+
+type TabKey = (typeof TABS)[number]["k"];
+
+// design-only tabs (drops/trades/showcases) filter client-side over the 'all' feed
+const backendFilter = (tab: TabKey): "all" | "following" =>
+  tab === "following" ? "following" : "all";
 
 export default function FeedPage() {
   const supabase = useSupabase();
   const { user, isAuthenticated } = useAuth();
-  const [activeFilter, setActiveFilter] = useState<'all' | 'following' | 'trending'>('all');
+
+  const [tab, setTab] = useState<TabKey>("foryou");
   const [posts, setPosts] = useState<Post[]>([]);
+  const [liked, setLiked] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const [postContent, setPostContent] = useState('');
+
+  const [postContent, setPostContent] = useState("");
   const [posting, setPosting] = useState(false);
+  const [focus, setFocus] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const observerRef = useRef<HTMLDivElement>(null);
 
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 12;
 
   useEffect(() => {
     setPage(0);
     setHasMore(true);
     fetchPosts(0, true);
-  }, [activeFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
 
-  async function fetchPosts(pageNum: number = 0, reset: boolean = false) {
+  async function fetchPosts(pageNum = 0, reset = false) {
     if (reset) setLoading(true);
     else setLoadingMore(true);
-
     try {
-      const result = await getPosts(supabase, activeFilter, pageNum, PAGE_SIZE, user?.id);
+      const result = await getPosts(supabase, backendFilter(tab), pageNum, PAGE_SIZE, user?.id);
       const newPosts = result.posts;
-
-      if (reset) {
-        setPosts(newPosts);
-      } else {
-        setPosts(prev => [...prev, ...newPosts]);
-      }
+      setPosts((prev) => (reset ? newPosts : [...prev, ...newPosts]));
       setHasMore(newPosts.length === PAGE_SIZE);
     } catch {
       if (reset) {
@@ -59,81 +73,76 @@ export default function FeedPage() {
     }
   }
 
-  // Infinite scroll observer
+  // infinite scroll
   useEffect(() => {
     if (!observerRef.current) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
-          const nextPage = page + 1;
-          setPage(nextPage);
-          fetchPosts(nextPage);
+          const next = page + 1;
+          setPage(next);
+          fetchPosts(next);
         }
       },
       { threshold: 0.1 }
     );
-
     observer.observe(observerRef.current);
     return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMore, loadingMore, loading, page]);
 
   function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
     if (files.length + imageFiles.length > 4) return;
-
     const newFiles = [...imageFiles, ...files];
     setImageFiles(newFiles);
-    imagePreviews.forEach(url => URL.revokeObjectURL(url));
-    setImagePreviews(newFiles.map(f => URL.createObjectURL(f)));
+    imagePreviews.forEach((url) => URL.revokeObjectURL(url));
+    setImagePreviews(newFiles.map((f) => URL.createObjectURL(f)));
   }
 
   function removeImage(index: number) {
     URL.revokeObjectURL(imagePreviews[index]);
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handleCreatePost() {
     if (!postContent.trim() || !user) return;
     setPosting(true);
     try {
-      // Upload images if any
-      let imageUrls: string[] = [];
+      const imageUrls: string[] = [];
       for (const file of imageFiles) {
         const formData = new FormData();
-        formData.append('file', file);
-        formData.append('bucket', 'post-images');
-        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        formData.append("file", file);
+        formData.append("bucket", "post-images");
+        const res = await fetch("/api/upload", { method: "POST", body: formData });
         if (res.ok) {
           const { url } = await res.json();
           imageUrls.push(url);
         }
       }
-
-      const res = await fetch('/api/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: postContent.trim(),
-          images: imageUrls.length > 0 ? imageUrls : [],
-          tags: postContent.match(/#(\w+)/g)?.map(t => t.slice(1)) ?? [],
+          images: imageUrls,
+          tags: postContent.match(/#(\w+)/g)?.map((t) => t.slice(1)) ?? [],
         }),
       });
       if (res.ok) {
         const { post } = await res.json();
-        const newPost = transformPost(post);
-        setPosts(prev => [newPost, ...prev]);
-        setPostContent('');
+        setPosts((prev) => [transformPost(post), ...prev]);
+        setPostContent("");
+        setFocus(false);
         setImageFiles([]);
-        imagePreviews.forEach(url => URL.revokeObjectURL(url));
+        imagePreviews.forEach((url) => URL.revokeObjectURL(url));
         setImagePreviews([]);
       } else {
-        const err = await res.json();
-        console.error('Failed to create post:', err);
+        console.error("Failed to create post:", await res.json());
       }
     } catch (err) {
-      console.error('Failed to create post:', err);
+      console.error("Failed to create post:", err);
     } finally {
       setPosting(false);
     }
@@ -142,166 +151,177 @@ export default function FeedPage() {
   async function handleLike(postId: string) {
     if (!user) return;
     try {
-      const res = await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
+      const res = await fetch(`/api/posts/${postId}/like`, { method: "POST" });
       if (res.ok) {
-        const { liked } = await res.json();
-        setPosts(prev =>
-          prev.map(p =>
-            p.id === postId
-              ? { ...p, likes: liked ? p.likes + 1 : p.likes - 1 }
-              : p
-          )
-        );
+        setLiked((prev) => {
+          const n = new Set(prev);
+          n.has(postId) ? n.delete(postId) : n.add(postId);
+          return n;
+        });
       }
     } catch (err) {
-      console.error('Failed to toggle like:', err);
+      console.error("Failed to toggle like:", err);
     }
   }
 
-  return (
-    <div className="min-h-screen bg-neutral-950 text-white pt-24 pb-16">
-      <div className="container max-w-4xl">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-center mb-6">
-            <Tag>Social Feed</Tag>
-          </div>
-          <h1 className="text-5xl md:text-6xl font-medium text-center mb-4">
-            Event Culture <span className="text-lime-400">Unfolds</span>
-          </h1>
-          <p className="text-center text-white/50 text-lg">
-            Share your event journey and discover what others are collecting
-          </p>
-        </div>
+  const visible = posts.filter((p) => typeMatchesTab(derivePostType(p), tab));
+  const canPost = !!postContent.trim();
 
-        {/* Create Post */}
-        {isAuthenticated && user && (
-          <div className="bg-neutral-900 border border-white/10 rounded-3xl p-6 mb-8">
-            <div className="flex gap-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-lime-400 to-green-400 flex items-center justify-center text-lg font-bold text-neutral-950">
-                {user.display_name?.[0]?.toUpperCase() ?? 'U'}
-              </div>
-              <div className="flex-1">
+  return (
+    <div className="dm-container" style={{ paddingTop: 28, paddingBottom: 80, position: "relative" }}>
+      {/* bg blob */}
+      <div style={{ position: "absolute", width: 600, height: 600, borderRadius: "50%", filter: "blur(80px)", background: "rgba(155,92,255,0.10)", left: "-12%", top: "-8%", pointerEvents: "none" }} />
+
+      {/* header */}
+      <div style={{ position: "relative", marginBottom: 26 }}>
+        <span className="dm-eyebrow">The Feed</span>
+        <h1 className="dm-display" style={{ fontSize: 52, fontWeight: 500, marginTop: 12 }}>
+          The floor, <span className="dm-grad-text">live</span>
+        </h1>
+        <p style={{ color: "var(--muted)", fontSize: 17, marginTop: 12, maxWidth: 540 }}>
+          Drops, trades, mints, and showcases from collectors across every verified event.
+        </p>
+      </div>
+
+      <div style={{ position: "relative", maxWidth: 1240 }}>
+        {/* composer */}
+        {isAuthenticated && user ? (
+          <div className="dm-panel" style={{ padding: 16, marginBottom: 24 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+              <span
+                className="dm-display"
+                style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 42, height: 42, borderRadius: "50%", flexShrink: 0, background: "var(--grad)", color: "#0a0710", fontWeight: 700, fontSize: 16 }}
+              >
+                {user.display_name?.[0]?.toUpperCase() ?? "U"}
+              </span>
+              <div style={{ flex: 1 }}>
                 <textarea
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
-                  placeholder="Share your latest event finds..."
-                  className="w-full bg-transparent border-none outline-none resize-none text-white placeholder:text-white/30"
-                  rows={3}
+                  onFocus={() => setFocus(true)}
+                  placeholder="Share a drop, trade, or showcase…"
+                  rows={focus || postContent ? 3 : 1}
+                  style={{ width: "100%", resize: "none", background: "transparent", border: "none", outline: "none", color: "var(--text)", fontSize: 15.5, lineHeight: 1.5, paddingTop: 9, fontFamily: "inherit" }}
                 />
 
-                {/* Image Previews */}
                 {imagePreviews.length > 0 && (
-                  <div className="flex gap-2 mt-3 mb-3">
+                  <div style={{ display: "flex", gap: 8, marginTop: 10, marginBottom: 4 }}>
                     {imagePreviews.map((preview, i) => (
-                      <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden group">
-                        <img src={preview} alt="" className="w-full h-full object-cover" />
+                      <div key={i} style={{ position: "relative", width: 76, height: 76, borderRadius: 12, overflow: "hidden" }}>
+                        <img src={preview} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         <button
                           type="button"
                           onClick={() => removeImage(i)}
-                          className="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition"
+                          style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: "50%", background: "rgba(4,3,8,0.7)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", border: "none" }}
                         >
-                          &times;
+                          <Icons.close size={12} />
                         </button>
                       </div>
                     ))}
                   </div>
                 )}
 
-                <div className="flex items-center justify-between pt-4 border-t border-white/10 mt-4">
-                  <div className="flex gap-2">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageSelect} style={{ display: "none" }} />
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="p-2 rounded-full hover:bg-white/5 transition"
+                      title="Add image"
+                      style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: 999, color: "var(--cyan)", background: "transparent", border: "none", cursor: "pointer" }}
                     >
-                      <svg className="w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                      <Icons.tag size={17} />
                     </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImageSelect}
-                      className="hidden"
-                    />
-                    <button className="p-2 rounded-full hover:bg-white/5 transition">
-                      <svg className="w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                      </svg>
-                    </button>
+                    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: 999, color: "var(--cyan)" }}><Icons.eye size={17} /></span>
+                    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: 999, color: "var(--cyan)" }}><Icons.spark size={17} /></span>
                   </div>
-                  <Button
-                    variant="primary"
-                    size="sm"
+                  <button
                     onClick={handleCreatePost}
-                    disabled={posting || !postContent.trim()}
+                    disabled={posting || !canPost}
+                    style={{ height: 38, padding: "0 18px", borderRadius: 999, fontSize: 13.5, fontWeight: 700, border: "none", background: "var(--grad)", color: "#0a0710", cursor: canPost && !posting ? "pointer" : "default", opacity: canPost && !posting ? 1 : 0.4, transition: "opacity .2s" }}
                   >
-                    {posting ? 'Posting...' : 'Post'}
-                  </Button>
+                    {posting ? "Posting…" : "Post"}
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-        )}
-
-        {/* Not signed in prompt */}
-        {!isAuthenticated && (
-          <div className="bg-neutral-900 border border-white/10 rounded-3xl p-6 mb-8 text-center">
-            <p className="text-white/50">Connect your wallet to create posts and interact with the community</p>
+        ) : (
+          <div className="dm-panel" style={{ padding: 18, marginBottom: 24, textAlign: "center" }}>
+            <p style={{ color: "var(--muted)" }}>Connect your wallet to post and interact with the floor.</p>
           </div>
         )}
 
-        {/* Filter Tabs */}
-        <div className="flex gap-4 mb-8 bg-neutral-900 border border-white/10 rounded-full p-1">
-          {(['all', 'following', 'trending'] as const).map(filter => (
+        {/* sticky tab bar */}
+        <div
+          className="dm-glass"
+          style={{ position: "sticky", top: 86, zIndex: 20, display: "flex", padding: 5, gap: 3, borderRadius: 999, marginBottom: 22, width: "fit-content", maxWidth: "100%", overflowX: "auto" }}
+        >
+          {TABS.map((t) => (
             <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`flex-1 py-2 px-4 rounded-full font-medium transition capitalize ${
-                activeFilter === filter ? 'bg-lime-400 text-neutral-950' : 'text-white/50 hover:text-white'
-              }`}
+              key={t.k}
+              onClick={() => setTab(t.k)}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                height: 38, padding: "0 18px", borderRadius: 999, fontSize: 13.5, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", border: "none", transition: "all .2s ease",
+                ...(tab === t.k ? { background: "var(--grad)", color: "#0a0710" } : { color: "var(--muted)", background: "transparent" }),
+              }}
             >
-              {filter === 'all' ? 'All Posts' : filter === 'following' ? 'Following' : 'Trending'}
+              {t.label}
             </button>
           ))}
         </div>
 
-        {/* Posts Feed */}
+        {/* feed */}
         {loading ? (
-          <div className="space-y-6">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-neutral-900 border border-white/10 rounded-3xl h-48 animate-pulse" />
+          <div style={{ columns: "320px", columnGap: 20 }}>
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="dm-panel" style={{ height: 220, marginBottom: 20, breakInside: "avoid", opacity: 0.5, animation: "dm-pulseGlow 1.4s ease-in-out infinite" }} />
             ))}
           </div>
+        ) : visible.length === 0 ? (
+          <div className="dm-panel" style={{ padding: 70, textAlign: "center" }}>
+            <div style={{ display: "flex", justifyContent: "center" }}><EclipseMark size={48} /></div>
+            <h3 className="dm-display" style={{ fontSize: 22, marginTop: 16 }}>Nothing here yet</h3>
+            <p style={{ color: "var(--muted)", marginTop: 6, maxWidth: 360, marginInline: "auto" }}>
+              {tab === "following"
+                ? "Follow a few collectors and their drops will land here."
+                : "Check back soon — the floor never sleeps."}
+            </p>
+            {tab === "following" && (
+              <button
+                onClick={() => setTab("foryou")}
+                style={{ marginTop: 18, height: 40, padding: "0 18px", borderRadius: 999, fontSize: 14, fontWeight: 600, background: "rgba(255,255,255,0.04)", border: "1px solid var(--line-2)", color: "var(--text)", cursor: "pointer" }}
+              >
+                Discover collectors
+              </button>
+            )}
+          </div>
         ) : (
-          <div className="space-y-6">
-            {posts.map(post => (
-              <PostCard key={post.id} post={post} onLike={handleLike} />
+          <div style={{ columns: "320px", columnGap: 20 }}>
+            {visible.map((p, i) => (
+              <FeedPostCard
+                key={p.id}
+                post={p}
+                liked={liked.has(p.id)}
+                onLike={handleLike}
+                currentUserId={user?.id}
+                delay={Math.min(i, 8) * 0.04}
+              />
             ))}
           </div>
         )}
 
-        {/* Load more trigger */}
+        {/* load more trigger */}
         {!loading && hasMore && (
-          <div ref={observerRef} className="py-8 flex justify-center">
+          <div ref={observerRef} style={{ padding: "32px 0", display: "flex", justifyContent: "center" }}>
             {loadingMore && (
-              <div className="animate-spin w-6 h-6 border-2 border-lime-400 border-t-transparent rounded-full" />
+              <div style={{ width: 24, height: 24, borderRadius: "50%", border: "2px solid var(--line-2)", borderTopColor: "var(--violet)", animation: "dm-spinSlow .9s linear infinite" }} />
             )}
           </div>
         )}
 
-        {!loading && posts.length === 0 && (
-          <div className="text-center py-20">
-            <div className="text-white/20 text-6xl mb-4">📝</div>
-            <h3 className="text-2xl font-medium mb-2">No posts yet</h3>
-            <p className="text-white/50">Be the first to share something!</p>
-          </div>
-        )}
-
-        {!loading && !hasMore && posts.length > 0 && (
-          <div className="text-center py-8 text-white/30 text-sm">
+        {!loading && !hasMore && visible.length > 0 && (
+          <div style={{ textAlign: "center", padding: "32px 0", color: "var(--faint)", fontSize: 13 }}>
             You&apos;ve reached the end
           </div>
         )}
