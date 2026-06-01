@@ -442,7 +442,7 @@ export default function EditListingPage({
 
           {/* Price & Quantity */}
           <div className="bg-neutral-900 border border-white/10 rounded-3xl p-8">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm text-white/50 mb-2">
                   Price (SOL) *
@@ -493,7 +493,7 @@ export default function EditListingPage({
             <div className="bg-neutral-900 border border-white/10 rounded-3xl p-8">
               <h3 className="text-lg font-medium mb-6">Shipping Information</h3>
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm text-white/50 mb-2">
                       Ships From
@@ -521,7 +521,7 @@ export default function EditListingPage({
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm text-white/50 mb-2">
                       Ships To (comma-separated)
