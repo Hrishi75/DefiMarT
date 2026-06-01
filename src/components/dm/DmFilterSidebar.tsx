@@ -74,7 +74,7 @@ export default function DmFilterSidebar({
 }: DmFilterSidebarProps) {
   return (
     <aside
-      className="dm-panel"
+      className="dm-panel dm-filter-sidebar"
       style={{ padding: 22, position: "sticky", top: 90 }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>

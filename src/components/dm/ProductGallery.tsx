@@ -46,7 +46,7 @@ export default function ProductGallery({ item, faved, onToggleFave }: ProductGal
   const views = buildViews(item);
 
   return (
-    <div style={{ position: "sticky", top: 90 }}>
+    <div className="dm-product-sticky" style={{ position: "sticky", top: 90 }}>
       {/* main image */}
       <div className="dm-grad-border" style={{ borderRadius: "var(--r-lg)" }}>
         <div
@@ -88,7 +88,7 @@ export default function ProductGallery({ item, faved, onToggleFave }: ProductGal
       </div>
 
       {/* thumbnails */}
-      <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
+      <div className="dm-product-thumbs" style={{ display: "flex", gap: 12, marginTop: 14 }}>
         {views.map((m, i) => (
           <button
             key={i}

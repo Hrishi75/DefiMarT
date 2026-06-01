@@ -62,7 +62,7 @@ export default function MarketplacePage() {
       {/* header */}
       <div style={{ position: "relative", marginBottom: 30 }}>
         <span className="dm-eyebrow">Marketplace</span>
-        <h1 className="dm-display" style={{ fontSize: 52, fontWeight: 500, marginTop: 12 }}>
+        <h1 className="dm-display dm-page-title" style={{ fontSize: 52, fontWeight: 500, marginTop: 12 }}>
           Discover event <span className="dm-grad-text">collectibles</span>
         </h1>
         <p style={{ color: "var(--muted)", fontSize: 17, marginTop: 12 }}>Verified merch and passes from Solana events worldwide.</p>

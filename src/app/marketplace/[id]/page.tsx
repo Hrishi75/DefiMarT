@@ -52,10 +52,10 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
             {item.event.verified && <Chip pill><Verified size={13} /> Verified event</Chip>}
           </div>
 
-          <h1 className="dm-display" style={{ fontSize: 40, fontWeight: 500, lineHeight: 1.05 }}>{item.title}</h1>
+          <h1 className="dm-display dm-section-title" style={{ fontSize: 40, fontWeight: 500, lineHeight: 1.05 }}>{item.title}</h1>
 
           {/* meta row */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 16, color: "var(--faint)", fontSize: 13.5 }}>
+          <div className="dm-prod-meta" style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 16, color: "var(--faint)", fontSize: 13.5 }}>
             <span style={{ display: "flex", alignItems: "center", gap: 5 }}><Icons.eye size={15} /> {item.views.toLocaleString()} views</span>
             <span style={{ display: "flex", alignItems: "center", gap: 5 }}><Icons.heart size={15} /> {item.faves} saved</span>
             <span style={{ display: "flex", alignItems: "center", gap: 5 }}><Icons.tag size={15} /> {item.condition}</span>
@@ -79,7 +79,7 @@ export default function ListingDetailPage({ params }: { params: { id: string } }
             </button>
           </Link>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20 }}>
+        <div className="dm-card-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20 }}>
           {moreFill.map((it, i) => (
             <ListingCard key={it.id} item={it} faves={faves} onToggleFave={toggleFave} onNavigate={(id) => router.push(`/marketplace/${id}`)} delay={i * 0.05} />
           ))}

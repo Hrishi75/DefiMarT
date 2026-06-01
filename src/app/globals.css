@@ -213,6 +213,8 @@ img { display: block; max-width: 100%; }
   .dm-prod-meta     { flex-wrap: wrap; gap: 10px 14px !important; }
 
   .dm-ticker-fade   { width: 60px !important; }
+
+  .dm-filter-sidebar { position: static !important; top: auto !important; }
 }
 
 @media (max-width: 600px) {
