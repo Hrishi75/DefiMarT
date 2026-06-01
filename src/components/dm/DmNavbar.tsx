@@ -18,6 +18,7 @@ const links = [
   { href: "/marketplace", label: "Marketplace" },
   { href: "/drops",      label: "Drops" },
   { href: "/feed",       label: "Feed" },
+  { href: "/docs",       label: "Docs" },
 ];
 
 export default function DmNavbar({ wallet, onConnect, onWalletClick }: DmNavbarProps) {
