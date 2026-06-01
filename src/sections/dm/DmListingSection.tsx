@@ -20,11 +20,11 @@ export default function DmListingSection({
   eyebrow, title, items, columns = 3, faves, onToggleFave, onNavigate,
 }: DmListingSectionProps) {
   return (
-    <section className="dm-container" style={{ marginTop: 90 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 30 }}>
+    <section className="dm-container dm-section-mt" style={{ marginTop: 90 }}>
+      <div className="dm-listing-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 30 }}>
         <div>
           <span className="dm-eyebrow">{eyebrow}</span>
-          <h2 className="dm-display" style={{ fontSize: 40, fontWeight: 500, marginTop: 12 }}>{title}</h2>
+          <h2 className="dm-display dm-section-title" style={{ fontSize: 40, fontWeight: 500, marginTop: 12 }}>{title}</h2>
         </div>
         <Link href="/marketplace">
           <DmButton variant="ghost" size="sm">View all <Icons.arrowR size={16} /></DmButton>

@@ -15,8 +15,8 @@ export default function Ticker() {
       }}
     >
       {/* fade masks */}
-      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 160, zIndex: 2, background: "linear-gradient(90deg, var(--bg), transparent)" }} />
-      <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 160, zIndex: 2, background: "linear-gradient(270deg, var(--bg), transparent)" }} />
+      <div className="dm-ticker-fade" style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 160, zIndex: 2, background: "linear-gradient(90deg, var(--bg), transparent)" }} />
+      <div className="dm-ticker-fade" style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 160, zIndex: 2, background: "linear-gradient(270deg, var(--bg), transparent)" }} />
 
       <div style={{ display: "flex", gap: 64, width: "max-content", animation: "dm-marquee 32s linear infinite" }}>
         {run.map((p, i) => (

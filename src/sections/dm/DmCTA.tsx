@@ -5,9 +5,9 @@ import { Icons } from "@/components/dm/Icons";
 
 export default function DmCTA() {
   return (
-    <section className="dm-container" style={{ marginTop: 130 }}>
+    <section className="dm-container dm-section-mt" style={{ marginTop: 130 }}>
       <div
-        className="dm-panel"
+        className="dm-panel dm-cta-wrap"
         style={{ position: "relative", overflow: "hidden", borderRadius: "var(--r-xl)", padding: "84px 40px", textAlign: "center" }}
       >
         {/* blobs */}
@@ -16,13 +16,13 @@ export default function DmCTA() {
 
         <div style={{ position: "relative" }}>
           <EclipseMark size={64} animate />
-          <h2 className="dm-display" style={{ fontSize: 56, fontWeight: 500, marginTop: 24, lineHeight: 1.02 }}>
+          <h2 className="dm-display dm-cta-title" style={{ fontSize: 56, fontWeight: 500, marginTop: 24, lineHeight: 1.02 }}>
             You showed up.<br /><span className="dm-grad-text">Own the proof.</span>
           </h2>
           <p style={{ color: "var(--muted)", fontSize: 18, maxWidth: 520, margin: "20px auto 0" }}>
             Connect your wallet and start trading the merch and moments from the events that built this ecosystem.
           </p>
-          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 36 }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 36, flexWrap: "wrap" }}>
             <Link href="/marketplace">
               <DmButton variant="primary" size="lg">Explore marketplace <Icons.arrowR size={18} /></DmButton>
             </Link>

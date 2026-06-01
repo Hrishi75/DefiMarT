@@ -16,7 +16,7 @@ export default function DmFooter() {
       {/* bg blob */}
       <div style={{ position: "absolute", width: 600, height: 600, borderRadius: "50%", filter: "blur(80px)", background: "rgba(155,92,255,0.16)", left: "30%", bottom: -460, pointerEvents: "none" }} />
 
-      <div className="dm-container" style={{ padding: "72px 28px 40px", position: "relative" }}>
+      <div className="dm-container" style={{ paddingTop: 72, paddingBottom: 40, position: "relative" }}>
         <div
           style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr 1fr 1fr", gap: 40 }}
           className="dm-foot-grid"
@@ -66,6 +66,7 @@ export default function DmFooter() {
 
         {/* bottom bar */}
         <div
+          className="dm-foot-bottom"
           style={{
             marginTop: 56, paddingTop: 24, borderTop: "1px solid var(--line)",
             display: "flex", justifyContent: "space-between", alignItems: "center",

@@ -175,7 +175,7 @@ export default function FeedPage() {
       {/* header */}
       <div style={{ position: "relative", marginBottom: 26 }}>
         <span className="dm-eyebrow">The Feed</span>
-        <h1 className="dm-display" style={{ fontSize: 52, fontWeight: 500, marginTop: 12 }}>
+        <h1 className="dm-display dm-page-title" style={{ fontSize: 52, fontWeight: 500, marginTop: 12 }}>
           The floor, <span className="dm-grad-text">live</span>
         </h1>
         <p style={{ color: "var(--muted)", fontSize: 17, marginTop: 12, maxWidth: 540 }}>

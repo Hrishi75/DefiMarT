@@ -70,7 +70,7 @@ export default function DocsPage() {
       {/* header */}
       <div style={{ position: "relative", marginBottom: 40, maxWidth: 760 }}>
         <span className="dm-eyebrow">Documentation</span>
-        <h1 className="dm-display" style={{ fontSize: 52, fontWeight: 500, marginTop: 12 }}>
+        <h1 className="dm-display dm-page-title" style={{ fontSize: 52, fontWeight: 500, marginTop: 12 }}>
           How DefiMart <span className="dm-grad-text">works</span>
         </h1>
         <p style={{ color: "var(--muted)", fontSize: 17, marginTop: 14, lineHeight: 1.6 }}>
