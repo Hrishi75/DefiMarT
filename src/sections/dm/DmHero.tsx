@@ -21,13 +21,13 @@ function HeroEclipse() {
           background: "rgba(155,92,255,0.28)", animation: "dm-pulse-glow 6s ease-in-out infinite",
         }}
       />
-      {/* real eclipse PNG composited via screen blend so the black bg drops out */}
+      {/* eclipse logo with baked alpha (black bg made transparent) — blends on any bg */}
       <img
-        src="/dm-assets/eclipse-logo.png"
+        src="/dm-assets/eclipse-glow.png"
         alt="Eclipse"
         style={{
           position: "relative", width: "100%", height: "100%", objectFit: "contain",
-          mixBlendMode: "screen", animation: "dm-floaty 9s ease-in-out infinite",
+          animation: "dm-floaty 9s ease-in-out infinite",
         }}
       />
       {/* floating verified chip */}
