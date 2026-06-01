@@ -7,7 +7,7 @@ import { Icons } from "./Icons";
 const cols = [
   { h: "Marketplace", items: [["Browse all", "/marketplace"], ["Apparel", "/marketplace"], ["Collectibles", "/marketplace"], ["NFT passes", "/marketplace"], ["New drops", "/drops"]] },
   { h: "Events",      items: [["Breakpoint", "/marketplace"], ["Hacker House", "/marketplace"], ["Colosseum", "/marketplace"], ["Summit", "/marketplace"], ["Submit event", "/marketplace"]] },
-  { h: "Protocol",    items: [["How escrow works", "/marketplace"], ["On-chain provenance", "/marketplace"], ["Fees", "/marketplace"], ["Docs", "/marketplace"], ["Status", "/marketplace"]] },
+  { h: "Protocol",    items: [["How escrow works", "/docs#escrow"], ["On-chain provenance", "/docs#provenance"], ["Fees", "/docs#currencies"], ["Docs", "/docs"], ["Status", "/docs"]] },
 ];
 
 export default function DmFooter() {
