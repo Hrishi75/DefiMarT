@@ -572,7 +572,7 @@ export default function CreateListingPage() {
           </div>
 
           {/* Price & Quantity Row */}
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium mb-2">
                 Price ({currency}) *
@@ -616,7 +616,7 @@ export default function CreateListingPage() {
           </div>
 
           {/* Category & Condition Row */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium mb-2">
                 Category *
@@ -707,7 +707,7 @@ export default function CreateListingPage() {
           <div className="bg-neutral-900 border border-white/10 rounded-2xl p-6">
             <h3 className="text-lg font-medium mb-4">Shipping Information</h3>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Ships From
@@ -735,7 +735,7 @@ export default function CreateListingPage() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Ships To
