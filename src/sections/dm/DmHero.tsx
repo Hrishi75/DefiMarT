@@ -63,7 +63,7 @@ const AVATARS = ["/dm-assets/avatar-1.jpg", "/dm-assets/avatar-2.jpg", "/dm-asse
 
 export default function DmHero({ onConnect }: DmHeroProps) {
   return (
-    <section style={{ position: "relative", overflow: "hidden", paddingTop: 40 }}>
+    <section className="dm-hero" style={{ position: "relative", overflow: "hidden", paddingTop: 40 }}>
       {/* bg blobs */}
       <div style={{ position: "absolute", width: 720, height: 720, borderRadius: "50%", filter: "blur(80px)", background: "rgba(79,134,255,0.14)", left: "-15%", top: "-20%", pointerEvents: "none" }} />
       <div style={{ position: "absolute", width: 620, height: 620, borderRadius: "50%", filter: "blur(80px)", background: "rgba(210,75,255,0.12)", right: "-12%", top: "10%", pointerEvents: "none" }} />

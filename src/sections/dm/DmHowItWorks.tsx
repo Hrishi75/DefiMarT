@@ -8,10 +8,10 @@ const STEPS = [
 
 export default function DmHowItWorks() {
   return (
-    <section className="dm-container" style={{ marginTop: 130 }}>
+    <section className="dm-container dm-section-mt" style={{ marginTop: 130 }}>
       <div style={{ textAlign: "center", marginBottom: 56 }}>
         <span className="dm-eyebrow">How it works</span>
-        <h2 className="dm-display" style={{ fontSize: 48, fontWeight: 500, marginTop: 14 }}>
+        <h2 className="dm-display dm-how-title" style={{ fontSize: 48, fontWeight: 500, marginTop: 14 }}>
           Trust, minus the <span className="dm-grad-text">trust fall</span>
         </h2>
       </div>
