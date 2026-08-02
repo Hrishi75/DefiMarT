@@ -1,8 +1,8 @@
 const STATS = [
-  { v: "48,200", l: "Items traded" },
-  { v: "12,800", l: "SOL volume" },
-  { v: "31",     l: "Verified events" },
-  { v: "9,400",  l: "Collectors" },
+  { v: "0",  l: "Items traded" },
+  { v: "0",  l: "SOL volume" },
+  { v: "4",  l: "Verified events" },
+  { v: "4",  l: "Collectors" },
 ];
 
 export default function DmStatBand() {
